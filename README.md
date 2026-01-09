@@ -12,6 +12,42 @@ cargo build
 cargo run -p api
 ```
 
+## Development Workflow
+
+1) Start PostgreSQL:
+```bash
+docker compose up -d
+```
+
+2) Set environment variables (example):
+```bash
+export DB_USERNAME=postgres
+export DB_PASSWORD=postgres
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_DBNAME=mydb
+```
+
+3) Run the API:
+```bash
+cargo run -p api
+```
+
+4) Lint/format/test:
+```bash
+cargo fmt
+cargo clippy --all-targets --all-features -- -D warnings
+cargo test
+```
+
+### DevContainer
+
+```bash
+cp .devcontainer/compose.override.yaml.sample .devcontainer/compose.override.yaml
+```
+
+Open the folder in VS Code and choose “Reopen in Container”. The container will build the toolchain and run `cargo build`.
+
 ## Project Structure
 
 ```
@@ -46,6 +82,15 @@ Set the following environment variables for database access:
 - `DB_DBNAME`
 
 Use `docker compose up -d` to start PostgreSQL locally.
+
+## Migrations (SQLx)
+
+Migrations live in `rust-fp/migrations/`.
+
+```bash
+sqlx migrate add <name>  # create a new migration
+sqlx migrate run         # apply migrations
+```
 
 ## Architecture (DDD)
 
