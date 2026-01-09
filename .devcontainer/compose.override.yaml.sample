@@ -1,0 +1,16 @@
+services:
+  dev:
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DBNAME: mydb
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      ENABLE_FIREWALL: "true"
+  db:
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432

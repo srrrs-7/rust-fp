@@ -1,0 +1,23 @@
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+application = { path = "../application" }
+chrono = { workspace = true }
+domain = { path = "../domain" }
+infrastructure = { path = "../infrastructure" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }
+axum = { version = "0.7" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "sync"] }
+http = "1"
+tower = "0.4"
+thiserror = { workspace = true }
+jsonwebtoken = "9"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+once_cell = "1"

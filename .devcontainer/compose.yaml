@@ -1,0 +1,30 @@
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ..:/workspace/main/rust-fp:cached
+    command: sleep infinity
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    depends_on:
+      db:
+        condition: service_healthy
+  db:
+    image: postgres:15
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db-data:
