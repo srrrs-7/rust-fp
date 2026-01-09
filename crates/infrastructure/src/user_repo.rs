@@ -3,8 +3,8 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use domain::error::AppError;
 use domain::user::{
-    CreateUserInput, DeleteUserInput, GetUserByEmailInput, GetUserByUsernameInput,
-    GetUserInput, ListUsersInput, UpdateUserInput, User,
+    CreateUserInput, DeleteUserInput, GetUserByEmailInput, GetUserByUsernameInput, GetUserInput,
+    ListUsersInput, UpdateUserInput, User,
 };
 use sqlx::{PgPool, Postgres, QueryBuilder};
 
@@ -101,7 +101,9 @@ impl UserRepository for UserRepositoryImpl {
 
         builder.push(" WHERE user_id = ");
         builder.push_bind(&input.user_id);
-        builder.push(" RETURNING user_id, client_id, username, email, name, picture, created_at, updated_at");
+        builder.push(
+            " RETURNING user_id, client_id, username, email, name, picture, created_at, updated_at",
+        );
 
         let row = builder
             .build_query_as::<UserRow>()
@@ -183,7 +185,7 @@ impl UserRepository for UserRepositoryImpl {
 
     async fn list_users(&self, input: ListUsersInput) -> Result<Vec<User>, AppError> {
         let page = input.page.unwrap_or(1).max(1);
-        let limit = input.limit.unwrap_or(20).max(1).min(100);
+        let limit = input.limit.unwrap_or(20).clamp(1, 100);
         let offset = (page - 1) * limit;
 
         let rows = sqlx::query_as::<_, UserRow>(

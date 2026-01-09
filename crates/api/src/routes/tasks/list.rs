@@ -16,7 +16,7 @@ pub async fn handler(
     Query(params): Query<Pagination>,
 ) -> Result<impl IntoResponse, ErrorResponse> {
     let page = params.page.unwrap_or(1).max(1);
-    let limit = params.limit.unwrap_or(20).max(1).min(100);
+    let limit = params.limit.unwrap_or(20).clamp(1, 100);
 
     let tasks = task_service::list_tasks(
         &state.task_repo,

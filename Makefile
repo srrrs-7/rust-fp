@@ -1,4 +1,4 @@
-.PHONY: build run test fmt clippy check db-up db-down
+.PHONY: build run test fmt clippy check db-up db-down hooks
 
 build:
 	cargo build
@@ -22,3 +22,8 @@ db-up:
 
 db-down:
 	docker compose down
+
+hooks:
+	git config core.hooksPath "$$(pwd)/.githooks"
+	chmod +x .githooks/pre-commit .githooks/pre-push
+	@echo "Git hooks installed to $$(pwd)/.githooks"

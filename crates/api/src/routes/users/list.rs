@@ -14,11 +14,14 @@ pub async fn handler(
     Query(query): Query<ListUsersQuery>,
 ) -> Result<impl IntoResponse, ErrorResponse> {
     if query.client_id.trim().is_empty() {
-        return Err(validation_error("invalid_client_id", "Client ID is required"));
+        return Err(validation_error(
+            "invalid_client_id",
+            "Client ID is required",
+        ));
     }
 
     let page = query.page.unwrap_or(1).max(1);
-    let limit = query.limit.unwrap_or(20).max(1).min(100);
+    let limit = query.limit.unwrap_or(20).clamp(1, 100);
 
     let users = user_service::list_users(
         &state.user_repo,

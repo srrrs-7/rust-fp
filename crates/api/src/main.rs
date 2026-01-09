@@ -31,8 +31,12 @@ async fn main() {
     let app = Router::new()
         .route("/health", get(|| async { "OK" }))
         .nest("/v1", routes::router(state))
-        .layer(axum::middleware::from_fn(middleware::request_logger::request_logger))
-        .layer(axum::middleware::from_fn(middleware::request_id::request_id));
+        .layer(axum::middleware::from_fn(
+            middleware::request_logger::request_logger,
+        ))
+        .layer(axum::middleware::from_fn(
+            middleware::request_id::request_id,
+        ));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8080")
         .await

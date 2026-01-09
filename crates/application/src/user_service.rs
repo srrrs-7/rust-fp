@@ -1,8 +1,8 @@
 use async_trait::async_trait;
 use domain::error::AppError;
 use domain::user::{
-    CreateUserInput, DeleteUserInput, GetUserByEmailInput, GetUserByUsernameInput,
-    GetUserInput, ListUsersInput, UpdateUserInput, User,
+    CreateUserInput, DeleteUserInput, GetUserByEmailInput, GetUserByUsernameInput, GetUserInput,
+    ListUsersInput, UpdateUserInput, User,
 };
 
 #[async_trait]

@@ -1,3 +1,4 @@
+use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use axum::middleware::Next;
 use axum::response::Response;
@@ -9,6 +10,7 @@ use tokio::sync::OnceCell;
 use crate::response::{from_app_error, ErrorResponse};
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct AuthUser {
     pub user_id: String,
     pub email: Option<String>,
@@ -38,7 +40,9 @@ struct Claims {
     #[serde(rename = "cognito:groups")]
     cognito_groups: Option<Vec<String>>,
     token_use: String,
+    #[allow(dead_code)]
     iss: String,
+    #[allow(dead_code)]
     aud: Option<String>,
 }
 
@@ -94,18 +98,21 @@ fn find_decoding_key(jwks: &JwkSet, kid: &str) -> Result<DecodingKey, AppError> 
             message: "Unknown key id".to_string(),
         })?;
 
-    DecodingKey::from_rsa_components(&jwk.n, &jwk.e)
-        .map_err(|error| AppError::Api {
-            message: error.to_string(),
-        })
+    DecodingKey::from_rsa_components(&jwk.n, &jwk.e).map_err(|error| AppError::Api {
+        message: error.to_string(),
+    })
 }
 
-pub async fn cognito_auth<B>(mut request: Request<B>, next: Next<B>) -> Result<Response, ErrorResponse> {
+pub async fn cognito_auth(
+    mut request: Request<Body>,
+    next: Next,
+) -> Result<Response, ErrorResponse> {
     let auth_header = request
         .headers()
         .get(axum::http::header::AUTHORIZATION)
         .and_then(|value| value.to_str().ok())
-        .unwrap_or("");
+        .unwrap_or("")
+        .to_string();
 
     if !auth_header.starts_with("Bearer ") {
         return Err(ErrorResponse::new(
@@ -124,19 +131,21 @@ pub async fn cognito_auth<B>(mut request: Request<B>, next: Next<B>) -> Result<R
         ));
     }
 
-    let header = decode_header(token)
-        .map_err(|_| ErrorResponse::new(StatusCode::UNAUTHORIZED, "UNAUTHORIZED", "Invalid token"))?;
+    let header = decode_header(token).map_err(|_| {
+        ErrorResponse::new(StatusCode::UNAUTHORIZED, "UNAUTHORIZED", "Invalid token")
+    })?;
 
-    let kid = header
-        .kid
-        .ok_or_else(|| ErrorResponse::new(StatusCode::UNAUTHORIZED, "UNAUTHORIZED", "Missing kid"))?;
+    let kid = header.kid.ok_or_else(|| {
+        ErrorResponse::new(StatusCode::UNAUTHORIZED, "UNAUTHORIZED", "Missing kid")
+    })?;
 
     let jwks = get_jwks().await.map_err(from_app_error)?;
     let key = find_decoding_key(jwks, &kid).map_err(from_app_error)?;
     let validation = build_validation().map_err(from_app_error)?;
 
-    let token_data = decode::<Claims>(token, &key, &validation)
-        .map_err(|_| ErrorResponse::new(StatusCode::UNAUTHORIZED, "UNAUTHORIZED", "Invalid token"))?;
+    let token_data = decode::<Claims>(token, &key, &validation).map_err(|_| {
+        ErrorResponse::new(StatusCode::UNAUTHORIZED, "UNAUTHORIZED", "Invalid token")
+    })?;
 
     if token_data.claims.token_use != "access" {
         return Err(ErrorResponse::new(

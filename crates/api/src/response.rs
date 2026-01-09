@@ -81,9 +81,11 @@ pub fn from_app_error(error: AppError) -> ErrorResponse {
         AppError::Domain { domain, message } => {
             ErrorResponse::new(StatusCode::INTERNAL_SERVER_ERROR, domain, message)
         }
-        AppError::Validation { code, message, field } => {
-            ErrorResponse::with_field(StatusCode::BAD_REQUEST, code, message, field)
-        }
+        AppError::Validation {
+            code,
+            message,
+            field,
+        } => ErrorResponse::with_field(StatusCode::BAD_REQUEST, code, message, field),
         AppError::Database { message } => ErrorResponse::new(
             StatusCode::INTERNAL_SERVER_ERROR,
             format!("{:?}", kind),

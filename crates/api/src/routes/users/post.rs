@@ -21,7 +21,10 @@ pub async fn handler(
         ));
     }
     if body.client_id.trim().is_empty() {
-        return Err(validation_error("invalid_client_id", "Client ID is required"));
+        return Err(validation_error(
+            "invalid_client_id",
+            "Client ID is required",
+        ));
     }
     if body.username.trim().is_empty() {
         return Err(validation_error("invalid_username", "Username is required"));

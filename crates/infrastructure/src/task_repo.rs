@@ -3,8 +3,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use domain::error::AppError;
 use domain::task::{
-    CreateTaskInput, DeleteTaskInput, GetTaskInput, ListTasksInput, Task,
-    UpdateTaskInput,
+    CreateTaskInput, DeleteTaskInput, GetTaskInput, ListTasksInput, Task, UpdateTaskInput,
 };
 use sqlx::{PgPool, Postgres, QueryBuilder};
 use uuid::Uuid;
@@ -65,14 +64,12 @@ impl TaskRepository for TaskRepositoryImpl {
         .await
         .map_err(|error| AppError::database(error.to_string()))?;
 
-        sqlx::query(
-            r#"INSERT INTO "_TasksToUser" ("A", "B") VALUES ($1, $2)"#,
-        )
-        .bind(row.task_id)
-        .bind(&input.user_id)
-        .execute(&mut *tx)
-        .await
-        .map_err(|error| AppError::database(error.to_string()))?;
+        sqlx::query(r#"INSERT INTO "_TasksToUser" ("A", "B") VALUES ($1, $2)"#)
+            .bind(row.task_id)
+            .bind(&input.user_id)
+            .execute(&mut *tx)
+            .await
+            .map_err(|error| AppError::database(error.to_string()))?;
 
         tx.commit()
             .await
@@ -98,9 +95,7 @@ impl TaskRepository for TaskRepositoryImpl {
         separated.push("version = version + 1");
         separated.push("updated_at = NOW()");
 
-        builder.push(
-            " FROM \"_TasksToUser\" tu WHERE tasks.task_id = tu.\"A\" AND tu.\"B\" = ",
-        );
+        builder.push(" FROM \"_TasksToUser\" tu WHERE tasks.task_id = tu.\"A\" AND tu.\"B\" = ");
         builder.push_bind(&input.user_id);
         builder.push(" AND tasks.task_id = ");
         builder.push_bind(task_id);

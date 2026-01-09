@@ -18,7 +18,10 @@ pub fn router(state: AppState) -> Router {
         .route("/user/:id", axum::routing::put(users::put::handler))
         .route("/user/:id", axum::routing::delete(users::delete::handler))
         .route("/users", axum::routing::get(users::list::handler))
-        .route("/users/by-email/:email", axum::routing::get(users::get_by_email::handler))
+        .route(
+            "/users/by-email/:email",
+            axum::routing::get(users::get_by_email::handler),
+        )
         .route(
             "/users/by-username/:username",
             axum::routing::get(users::get_by_username::handler),

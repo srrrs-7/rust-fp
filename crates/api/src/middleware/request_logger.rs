@@ -1,8 +1,10 @@
-use axum::http::{Request, Response};
+use axum::body::Body;
+use axum::http::Request;
 use axum::middleware::Next;
+use axum::response::Response;
 use std::time::Instant;
 
-pub async fn request_logger<B>(request: Request<B>, next: Next<B>) -> Response {
+pub async fn request_logger(request: Request<Body>, next: Next) -> Response {
     let method = request.method().clone();
     let path = request.uri().path().to_string();
     let request_id = request

@@ -1,8 +1,7 @@
 use async_trait::async_trait;
 use domain::error::AppError;
 use domain::task::{
-    CreateTaskInput, DeleteTaskInput, GetTaskInput, ListTasksInput, Task,
-    UpdateTaskInput,
+    CreateTaskInput, DeleteTaskInput, GetTaskInput, ListTasksInput, Task, UpdateTaskInput,
 };
 
 #[async_trait]
