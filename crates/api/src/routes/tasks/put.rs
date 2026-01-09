@@ -48,7 +48,7 @@ pub async fn handler(
     };
 
     let count = task_service::update_task(
-        &state.task_repo,
+        state.task_repo.as_ref(),
         UpdateTaskInput {
             user_id: user.user_id,
             task_id,
@@ -61,4 +61,81 @@ pub async fn handler(
     .map_err(from_app_error)?;
 
     Ok((StatusCode::OK, Json(CountResponse { count })))
+}
+
+#[cfg(test)]
+mod tests {
+    use axum::extract::{Extension, Path, State};
+    use axum::http::StatusCode;
+    use axum::Json;
+    use domain::error::AppError;
+
+    use super::handler;
+    use crate::routes::tasks::UpdateTaskRequest;
+    use crate::routes::test_support::{
+        app_state, assert_status, auth_user, MockTaskRepo, MockUserRepo,
+    };
+
+    #[tokio::test]
+    async fn returns_bad_request_for_empty_body() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let body = UpdateTaskRequest {
+            content: None,
+            status: None,
+            version: 0,
+        };
+
+        let result = handler(
+            State(state),
+            Extension(auth_user()),
+            Path("task-1".to_string()),
+            Json(body),
+        )
+        .await;
+
+        assert_status(result, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn returns_ok_on_success() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let body = UpdateTaskRequest {
+            content: Some("updated".to_string()),
+            status: None,
+            version: 1,
+        };
+
+        let result = handler(
+            State(state),
+            Extension(auth_user()),
+            Path("task-1".to_string()),
+            Json(body),
+        )
+        .await;
+
+        assert_status(result, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_on_repo_failure() {
+        let state = app_state(
+            MockTaskRepo::with_update_result(Err(AppError::database("db error"))),
+            MockUserRepo::default(),
+        );
+        let body = UpdateTaskRequest {
+            content: Some("updated".to_string()),
+            status: None,
+            version: 1,
+        };
+
+        let result = handler(
+            State(state),
+            Extension(auth_user()),
+            Path("task-1".to_string()),
+            Json(body),
+        )
+        .await;
+
+        assert_status(result, StatusCode::INTERNAL_SERVER_ERROR);
+    }
 }

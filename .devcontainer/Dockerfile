@@ -33,6 +33,7 @@ USER vscode
 RUN curl -fsSL https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 ENV PATH="/home/vscode/.cargo/bin:${PATH}"
 RUN rustup component add rustfmt clippy
+RUN cargo install sqlx-cli --no-default-features --features postgres
 
 # Install claude code
 RUN curl -fsSL https://claude.ai/install.sh | bash

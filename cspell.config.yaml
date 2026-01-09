@@ -8,17 +8,20 @@ dictionaryDefinitions: []
 dictionaries: []
 words:
   - axum
+  - cargo
   - clippy
-  - sqlx
-  - tokio
-  - serde
-  - serde_json
-  - uuid
+  - devcontainer
+  - dnsutils
+  - esac
+  - mcpjson
   - postgres
   - postgresql
   - rustlang
-  - cargo
-  - devcontainer
-  - mcpjson
+  - serde
+  - serde_json
+  - sqlx
+  - tokio
+  - trixie
+  - uuid
 ignoreWords: []
 import: []

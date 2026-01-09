@@ -24,7 +24,7 @@ pub async fn handler(
     let limit = query.limit.unwrap_or(20).clamp(1, 100);
 
     let users = user_service::list_users(
-        &state.user_repo,
+        state.user_repo.as_ref(),
         ListUsersInput {
             client_id: query.client_id,
             page: Some(page),
@@ -49,4 +49,60 @@ pub async fn handler(
     };
 
     Ok(Json(response))
+}
+
+#[cfg(test)]
+mod tests {
+    use axum::extract::{Query, State};
+    use axum::http::StatusCode;
+    use domain::error::AppError;
+
+    use super::handler;
+    use crate::routes::test_support::{app_state, assert_status, MockTaskRepo, MockUserRepo};
+    use crate::routes::users::ListUsersQuery;
+
+    #[tokio::test]
+    async fn returns_bad_request_for_missing_client_id() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let query = ListUsersQuery {
+            client_id: " ".to_string(),
+            page: None,
+            limit: None,
+        };
+
+        let result = handler(State(state), Query(query)).await;
+
+        assert_status(result, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn returns_ok_on_success() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let query = ListUsersQuery {
+            client_id: "client-1".to_string(),
+            page: Some(1),
+            limit: Some(10),
+        };
+
+        let result = handler(State(state), Query(query)).await;
+
+        assert_status(result, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_on_repo_failure() {
+        let state = app_state(
+            MockTaskRepo::default(),
+            MockUserRepo::with_list_result(Err(AppError::database("db error"))),
+        );
+        let query = ListUsersQuery {
+            client_id: "client-1".to_string(),
+            page: None,
+            limit: None,
+        };
+
+        let result = handler(State(state), Query(query)).await;
+
+        assert_status(result, StatusCode::INTERNAL_SERVER_ERROR);
+    }
 }

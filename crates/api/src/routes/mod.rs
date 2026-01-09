@@ -6,6 +6,9 @@ use crate::AppState;
 pub mod tasks;
 pub mod users;
 
+#[cfg(test)]
+pub mod test_support;
+
 pub fn router(state: AppState) -> Router {
     Router::new()
         .route("/task", axum::routing::post(tasks::post::handler))

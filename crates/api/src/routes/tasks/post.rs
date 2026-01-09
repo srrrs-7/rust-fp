@@ -32,7 +32,7 @@ pub async fn handler(
     }
 
     let task = task_service::create_task(
-        &state.task_repo,
+        state.task_repo.as_ref(),
         CreateTaskInput {
             user_id: user.user_id,
             content: body.content,
@@ -48,4 +48,73 @@ pub async fn handler(
         completed_at: task.completed_at.map(|dt| dt.to_rfc3339()),
         version: task.version,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use axum::extract::{Extension, State};
+    use axum::http::StatusCode;
+    use axum::Json;
+    use domain::error::AppError;
+
+    use super::handler;
+    use crate::routes::tasks::CreateTaskRequest;
+    use crate::routes::test_support::{
+        app_state, assert_status, auth_user, MockTaskRepo, MockUserRepo,
+    };
+
+    #[tokio::test]
+    async fn returns_bad_request_for_invalid_content() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let body = CreateTaskRequest {
+            content: " ".to_string(),
+            status: None,
+        };
+
+        let result = handler(State(state), Extension(auth_user()), Json(body)).await;
+
+        assert_status(result, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn returns_bad_request_for_invalid_status() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let body = CreateTaskRequest {
+            content: "task".to_string(),
+            status: Some("INVALID".to_string()),
+        };
+
+        let result = handler(State(state), Extension(auth_user()), Json(body)).await;
+
+        assert_status(result, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn returns_ok_on_success() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let body = CreateTaskRequest {
+            content: "task".to_string(),
+            status: None,
+        };
+
+        let result = handler(State(state), Extension(auth_user()), Json(body)).await;
+
+        assert_status(result, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_on_repo_failure() {
+        let state = app_state(
+            MockTaskRepo::with_create_result(Err(AppError::database("db error"))),
+            MockUserRepo::default(),
+        );
+        let body = CreateTaskRequest {
+            content: "task".to_string(),
+            status: None,
+        };
+
+        let result = handler(State(state), Extension(auth_user()), Json(body)).await;
+
+        assert_status(result, StatusCode::INTERNAL_SERVER_ERROR);
+    }
 }

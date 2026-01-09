@@ -19,7 +19,7 @@ pub async fn handler(
     let limit = params.limit.unwrap_or(20).clamp(1, 100);
 
     let tasks = task_service::list_tasks(
-        &state.task_repo,
+        state.task_repo.as_ref(),
         ListTasksInput {
             user_id: user.user_id,
             page,
@@ -45,4 +45,46 @@ pub async fn handler(
     };
 
     Ok(Json(response))
+}
+
+#[cfg(test)]
+mod tests {
+    use axum::extract::{Extension, Query, State};
+    use axum::http::StatusCode;
+    use domain::error::AppError;
+
+    use super::handler;
+    use crate::routes::tasks::Pagination;
+    use crate::routes::test_support::{
+        app_state, assert_status, auth_user, MockTaskRepo, MockUserRepo,
+    };
+
+    #[tokio::test]
+    async fn returns_ok_on_success() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let params = Pagination {
+            page: Some(1),
+            limit: Some(10),
+        };
+
+        let result = handler(State(state), Extension(auth_user()), Query(params)).await;
+
+        assert_status(result, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_on_repo_failure() {
+        let state = app_state(
+            MockTaskRepo::with_list_result(Err(AppError::database("db error"))),
+            MockUserRepo::default(),
+        );
+        let params = Pagination {
+            page: None,
+            limit: None,
+        };
+
+        let result = handler(State(state), Extension(auth_user()), Query(params)).await;
+
+        assert_status(result, StatusCode::INTERNAL_SERVER_ERROR);
+    }
 }

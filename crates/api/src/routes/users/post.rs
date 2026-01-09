@@ -34,7 +34,7 @@ pub async fn handler(
     }
 
     let user = user_service::create_user(
-        &state.user_repo,
+        state.user_repo.as_ref(),
         CreateUserInput {
             user_id: body.user_id,
             client_id: body.client_id,
@@ -56,4 +56,70 @@ pub async fn handler(
             email: user.email,
         }),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    use axum::extract::State;
+    use axum::http::StatusCode;
+    use axum::Json;
+    use domain::error::AppError;
+
+    use super::handler;
+    use crate::routes::test_support::{app_state, assert_status, MockTaskRepo, MockUserRepo};
+    use crate::routes::users::CreateUserRequest;
+
+    #[tokio::test]
+    async fn returns_bad_request_for_missing_fields() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let body = CreateUserRequest {
+            user_id: "".to_string(),
+            client_id: "".to_string(),
+            username: "".to_string(),
+            email: "".to_string(),
+            name: None,
+            picture: None,
+        };
+
+        let result = handler(State(state), Json(body)).await;
+
+        assert_status(result, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn returns_created_on_success() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+        let body = CreateUserRequest {
+            user_id: "user-1".to_string(),
+            client_id: "client-1".to_string(),
+            username: "user1".to_string(),
+            email: "user1@example.com".to_string(),
+            name: None,
+            picture: None,
+        };
+
+        let result = handler(State(state), Json(body)).await;
+
+        assert_status(result, StatusCode::CREATED);
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_on_repo_failure() {
+        let state = app_state(
+            MockTaskRepo::default(),
+            MockUserRepo::with_create_result(Err(AppError::database("db error"))),
+        );
+        let body = CreateUserRequest {
+            user_id: "user-1".to_string(),
+            client_id: "client-1".to_string(),
+            username: "user1".to_string(),
+            email: "user1@example.com".to_string(),
+            name: None,
+            picture: None,
+        };
+
+        let result = handler(State(state), Json(body)).await;
+
+        assert_status(result, StatusCode::INTERNAL_SERVER_ERROR);
+    }
 }

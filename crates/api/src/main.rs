@@ -1,4 +1,8 @@
 use axum::{routing::get, Router};
+use std::sync::Arc;
+
+use application::task_service::TaskRepository;
+use application::user_service::UserRepository;
 use infrastructure::db::{build_pool, DbConfig};
 use infrastructure::task_repo::TaskRepositoryImpl;
 use infrastructure::user_repo::UserRepositoryImpl;
@@ -10,8 +14,8 @@ mod routes;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub task_repo: TaskRepositoryImpl,
-    pub user_repo: UserRepositoryImpl,
+    pub task_repo: Arc<dyn TaskRepository>,
+    pub user_repo: Arc<dyn UserRepository>,
 }
 
 #[tokio::main]
@@ -24,8 +28,8 @@ async fn main() {
         .expect("Failed to build database pool");
 
     let state = AppState {
-        task_repo: TaskRepositoryImpl::new(pool.clone()),
-        user_repo: UserRepositoryImpl::new(pool),
+        task_repo: Arc::new(TaskRepositoryImpl::new(pool.clone())),
+        user_repo: Arc::new(UserRepositoryImpl::new(pool)),
     };
 
     let app = Router::new()

@@ -14,11 +14,13 @@ pub async fn handler(
     State(state): State<AppState>,
     Path(username): Path<String>,
 ) -> Result<impl IntoResponse, ErrorResponse> {
-    let user =
-        user_service::get_user_by_username(&state.user_repo, GetUserByUsernameInput { username })
-            .await
-            .map_err(from_app_error)?
-            .ok_or_else(|| from_app_error(AppError::not_found("User", "User not found")))?;
+    let user = user_service::get_user_by_username(
+        state.user_repo.as_ref(),
+        GetUserByUsernameInput { username },
+    )
+    .await
+    .map_err(from_app_error)?
+    .ok_or_else(|| from_app_error(AppError::not_found("User", "User not found")))?;
 
     Ok(Json(UserResponse {
         user_id: user.user_id,
@@ -26,4 +28,47 @@ pub async fn handler(
         username: user.username,
         email: user.email,
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use axum::extract::{Path, State};
+    use axum::http::StatusCode;
+    use domain::error::AppError;
+
+    use super::handler;
+    use crate::routes::test_support::{app_state, assert_status, MockTaskRepo, MockUserRepo};
+
+    #[tokio::test]
+    async fn returns_ok_on_success() {
+        let state = app_state(MockTaskRepo::default(), MockUserRepo::default());
+
+        let result = handler(State(state), Path("user1".to_string())).await;
+
+        assert_status(result, StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn returns_not_found_when_missing() {
+        let state = app_state(
+            MockTaskRepo::default(),
+            MockUserRepo::with_get_by_username_result(Ok(None)),
+        );
+
+        let result = handler(State(state), Path("user1".to_string())).await;
+
+        assert_status(result, StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn returns_internal_server_error_on_repo_failure() {
+        let state = app_state(
+            MockTaskRepo::default(),
+            MockUserRepo::with_get_by_username_result(Err(AppError::database("db error"))),
+        );
+
+        let result = handler(State(state), Path("user1".to_string())).await;
+
+        assert_status(result, StatusCode::INTERNAL_SERVER_ERROR);
+    }
 }
