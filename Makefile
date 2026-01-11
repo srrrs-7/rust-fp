@@ -47,4 +47,13 @@ migrate-run:
 	sqlx migrate run
 
 init-firewall:
-	./.devcontainer/init-firewall.sh
+	@if [ "$$(id -u)" -ne 0 ]; then \
+		if command -v sudo >/dev/null 2>&1; then \
+			sudo ./.devcontainer/init-firewall.sh; \
+		else \
+			echo "ERROR: init-firewall requires root; please run 'sudo make init-firewall'"; \
+			exit 1; \
+		fi; \
+	else \
+		./.devcontainer/init-firewall.sh; \
+	fi

@@ -6,7 +6,7 @@ echo "Starting Dev Container setup..."
 cargo build
 
 make hooks
-make init-firewall
+sudo make init-firewall
 
 if [ ! -f ".devcontainer/setup.personal.sh" ]; then
   cat << 'PERSONAL' > .devcontainer/setup.personal.sh
