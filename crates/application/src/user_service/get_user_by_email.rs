@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::user::{GetUserByEmailInput, User};
+use domain::user::entity::User;
+use domain::user::inputs::GetUserByEmailInput;
 
-use super::UserRepository;
+use super::repository::UserRepository;
 
 pub async fn get_user_by_email<R: UserRepository + ?Sized>(
     repo: &R,

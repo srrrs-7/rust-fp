@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::task::{CreateTaskInput, Task};
+use domain::task::entity::Task;
+use domain::task::inputs::CreateTaskInput;
 
-use super::TaskRepository;
+use super::repository::TaskRepository;
 
 pub async fn create_task<R: TaskRepository + ?Sized>(
     repo: &R,

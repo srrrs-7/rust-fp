@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::user::{ListUsersInput, User};
+use domain::user::entity::User;
+use domain::user::inputs::ListUsersInput;
 
-use super::UserRepository;
+use super::repository::UserRepository;
 
 pub async fn list_users<R: UserRepository + ?Sized>(
     repo: &R,

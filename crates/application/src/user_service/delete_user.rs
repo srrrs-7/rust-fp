@@ -1,7 +1,7 @@
 use domain::error::AppError;
-use domain::user::DeleteUserInput;
+use domain::user::inputs::DeleteUserInput;
 
-use super::UserRepository;
+use super::repository::UserRepository;
 
 pub async fn delete_user<R: UserRepository + ?Sized>(
     repo: &R,

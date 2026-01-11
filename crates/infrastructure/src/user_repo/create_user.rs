@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::user::{CreateUserInput, User};
+use domain::user::entity::User;
+use domain::user::inputs::CreateUserInput;
 
-use super::{map_db_error, UserRepositoryImpl, UserRow};
+use super::repository::{map_db_error, UserRepositoryImpl, UserRow};
 
 pub async fn create_user(
     repo: &UserRepositoryImpl,

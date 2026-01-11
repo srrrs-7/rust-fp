@@ -4,10 +4,10 @@ use axum::response::IntoResponse;
 use axum::Json;
 
 use application::user_service;
-use domain::user::CreateUserInput;
+use domain::user::inputs::CreateUserInput;
 
 use crate::response::{from_app_error, validation_error, ErrorResponse};
-use crate::routes::users::{CreateUserRequest, UserResponse};
+use crate::routes::users::types::{CreateUserRequest, UserResponse};
 use crate::AppState;
 
 pub async fn handler(
@@ -33,7 +33,7 @@ pub async fn handler(
         return Err(validation_error("invalid_email", "Email is required"));
     }
 
-    let user = user_service::create_user(
+    let user = user_service::create_user::create_user(
         state.user_repo.as_ref(),
         CreateUserInput {
             user_id: body.user_id,
@@ -49,12 +49,7 @@ pub async fn handler(
 
     Ok((
         StatusCode::CREATED,
-        Json(UserResponse {
-            user_id: user.user_id,
-            client_id: user.client_id,
-            username: user.username,
-            email: user.email,
-        }),
+        Json(UserResponse::from(user)),
     ))
 }
 
@@ -67,7 +62,7 @@ mod tests {
 
     use super::handler;
     use crate::routes::test_support::{app_state, assert_status, MockTaskRepo, MockUserRepo};
-    use crate::routes::users::CreateUserRequest;
+    use crate::routes::users::types::CreateUserRequest;
 
     #[tokio::test]
     async fn returns_bad_request_for_missing_fields() {

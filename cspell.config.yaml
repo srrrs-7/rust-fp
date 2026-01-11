@@ -9,6 +9,7 @@ dictionaries: []
 words:
   - axum
   - cargo
+  - chrono
   - clippy
   - devcontainer
   - dnsutils
@@ -20,6 +21,7 @@ words:
   - serde
   - serde_json
   - sqlx
+  - thiserror
   - tokio
   - trixie
   - uuid

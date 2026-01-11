@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::task::{ListTasksInput, Task};
+use domain::task::entity::Task;
+use domain::task::inputs::ListTasksInput;
 
-use super::{TaskRepositoryImpl, TaskRow};
+use super::repository::{TaskRepositoryImpl, TaskRow};
 
 pub async fn list_tasks(
     repo: &TaskRepositoryImpl,

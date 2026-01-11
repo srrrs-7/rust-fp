@@ -3,11 +3,11 @@ use axum::response::IntoResponse;
 use axum::Json;
 
 use application::task_service;
-use domain::task::ListTasksInput;
+use domain::task::inputs::ListTasksInput;
 
 use crate::middleware::cognito_auth::AuthUser;
 use crate::response::{from_app_error, ErrorResponse};
-use crate::routes::tasks::{Pagination, TaskListResponse, TaskResponse};
+use crate::routes::tasks::types::{Pagination, TaskListResponse, TaskResponse};
 use crate::AppState;
 
 pub async fn handler(
@@ -18,7 +18,7 @@ pub async fn handler(
     let page = params.page.unwrap_or(1).max(1);
     let limit = params.limit.unwrap_or(20).clamp(1, 100);
 
-    let tasks = task_service::list_tasks(
+    let tasks = task_service::list_tasks::list_tasks(
         state.task_repo.as_ref(),
         ListTasksInput {
             user_id: user.user_id,
@@ -30,16 +30,7 @@ pub async fn handler(
     .map_err(from_app_error)?;
 
     let response = TaskListResponse {
-        tasks: tasks
-            .into_iter()
-            .map(|task| TaskResponse {
-                task_id: task.task_id,
-                user_id: task.user_id,
-                content: task.content,
-                completed_at: task.completed_at.map(|dt| dt.to_rfc3339()),
-                version: task.version,
-            })
-            .collect(),
+        tasks: tasks.into_iter().map(TaskResponse::from).collect(),
         page,
         limit,
     };
@@ -54,7 +45,7 @@ mod tests {
     use domain::error::AppError;
 
     use super::handler;
-    use crate::routes::tasks::Pagination;
+    use crate::routes::tasks::types::Pagination;
     use crate::routes::test_support::{
         app_state, assert_status, auth_user, MockTaskRepo, MockUserRepo,
     };

@@ -1,8 +1,9 @@
 use domain::error::AppError;
-use domain::user::{UpdateUserInput, User};
+use domain::user::entity::User;
+use domain::user::inputs::UpdateUserInput;
 use sqlx::{Postgres, QueryBuilder};
 
-use super::{map_db_error, UserRepositoryImpl, UserRow};
+use super::repository::{map_db_error, UserRepositoryImpl, UserRow};
 
 pub async fn update_user(
     repo: &UserRepositoryImpl,

@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::user::{UpdateUserInput, User};
+use domain::user::entity::User;
+use domain::user::inputs::UpdateUserInput;
 
-use super::UserRepository;
+use super::repository::UserRepository;
 
 pub async fn update_user<R: UserRepository + ?Sized>(
     repo: &R,

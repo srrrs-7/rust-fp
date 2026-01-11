@@ -1,7 +1,7 @@
 use domain::error::AppError;
-use domain::task::DeleteTaskInput;
+use domain::task::inputs::DeleteTaskInput;
 
-use super::TaskRepository;
+use super::repository::TaskRepository;
 
 pub async fn delete_task<R: TaskRepository + ?Sized>(
     repo: &R,

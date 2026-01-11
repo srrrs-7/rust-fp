@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::user::{CreateUserInput, User};
+use domain::user::entity::User;
+use domain::user::inputs::CreateUserInput;
 
-use super::UserRepository;
+use super::repository::UserRepository;
 
 pub async fn create_user<R: UserRepository + ?Sized>(
     repo: &R,

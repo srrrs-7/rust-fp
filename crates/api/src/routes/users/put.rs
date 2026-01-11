@@ -3,10 +3,10 @@ use axum::response::IntoResponse;
 use axum::Json;
 
 use application::user_service;
-use domain::user::UpdateUserInput;
+use domain::user::inputs::UpdateUserInput;
 
 use crate::response::{from_app_error, validation_error, ErrorResponse};
-use crate::routes::users::{UpdateUserRequest, UserResponse};
+use crate::routes::users::types::{UpdateUserRequest, UserResponse};
 use crate::AppState;
 
 pub async fn handler(
@@ -25,7 +25,7 @@ pub async fn handler(
         ));
     }
 
-    let user = user_service::update_user(
+    let user = user_service::update_user::update_user(
         state.user_repo.as_ref(),
         UpdateUserInput {
             user_id,
@@ -38,12 +38,7 @@ pub async fn handler(
     .await
     .map_err(from_app_error)?;
 
-    Ok(Json(UserResponse {
-        user_id: user.user_id,
-        client_id: user.client_id,
-        username: user.username,
-        email: user.email,
-    }))
+    Ok(Json(UserResponse::from(user)))
 }
 
 #[cfg(test)]
@@ -55,7 +50,7 @@ mod tests {
 
     use super::handler;
     use crate::routes::test_support::{app_state, assert_status, MockTaskRepo, MockUserRepo};
-    use crate::routes::users::UpdateUserRequest;
+    use crate::routes::users::types::UpdateUserRequest;
 
     #[tokio::test]
     async fn returns_bad_request_for_empty_body() {

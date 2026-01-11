@@ -3,17 +3,20 @@ use axum::response::IntoResponse;
 use axum::Json;
 
 use application::user_service;
-use domain::user::DeleteUserInput;
+use domain::user::inputs::DeleteUserInput;
 
 use crate::response::{from_app_error, ErrorResponse};
-use crate::routes::users::CountResponse;
+use crate::routes::users::types::CountResponse;
 use crate::AppState;
 
 pub async fn handler(
     State(state): State<AppState>,
     Path(user_id): Path<String>,
 ) -> Result<impl IntoResponse, ErrorResponse> {
-    let count = user_service::delete_user(state.user_repo.as_ref(), DeleteUserInput { user_id })
+    let count = user_service::delete_user::delete_user(
+        state.user_repo.as_ref(),
+        DeleteUserInput { user_id },
+    )
         .await
         .map_err(from_app_error)?;
 

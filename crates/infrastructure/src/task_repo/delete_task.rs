@@ -1,8 +1,8 @@
 use domain::error::AppError;
-use domain::task::DeleteTaskInput;
+use domain::task::inputs::DeleteTaskInput;
 use uuid::Uuid;
 
-use super::TaskRepositoryImpl;
+use super::repository::TaskRepositoryImpl;
 
 pub async fn delete_task(
     repo: &TaskRepositoryImpl,

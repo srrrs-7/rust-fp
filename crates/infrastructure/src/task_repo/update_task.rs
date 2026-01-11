@@ -1,9 +1,9 @@
 use domain::error::AppError;
-use domain::task::UpdateTaskInput;
+use domain::task::inputs::UpdateTaskInput;
 use sqlx::{Postgres, QueryBuilder};
 use uuid::Uuid;
 
-use super::TaskRepositoryImpl;
+use super::repository::TaskRepositoryImpl;
 
 pub async fn update_task(
     repo: &TaskRepositoryImpl,

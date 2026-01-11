@@ -3,10 +3,10 @@ use axum::response::IntoResponse;
 use axum::Json;
 
 use application::user_service;
-use domain::user::ListUsersInput;
+use domain::user::inputs::ListUsersInput;
 
 use crate::response::{from_app_error, validation_error, ErrorResponse};
-use crate::routes::users::{ListUsersQuery, UserListResponse, UserResponse};
+use crate::routes::users::types::{ListUsersQuery, UserListResponse, UserResponse};
 use crate::AppState;
 
 pub async fn handler(
@@ -23,7 +23,7 @@ pub async fn handler(
     let page = query.page.unwrap_or(1).max(1);
     let limit = query.limit.unwrap_or(20).clamp(1, 100);
 
-    let users = user_service::list_users(
+    let users = user_service::list_users::list_users(
         state.user_repo.as_ref(),
         ListUsersInput {
             client_id: query.client_id,
@@ -35,15 +35,7 @@ pub async fn handler(
     .map_err(from_app_error)?;
 
     let response = UserListResponse {
-        users: users
-            .into_iter()
-            .map(|user| UserResponse {
-                user_id: user.user_id,
-                client_id: user.client_id,
-                username: user.username,
-                email: user.email,
-            })
-            .collect(),
+        users: users.into_iter().map(UserResponse::from).collect(),
         page,
         limit,
     };
@@ -59,7 +51,7 @@ mod tests {
 
     use super::handler;
     use crate::routes::test_support::{app_state, assert_status, MockTaskRepo, MockUserRepo};
-    use crate::routes::users::ListUsersQuery;
+    use crate::routes::users::types::ListUsersQuery;
 
     #[tokio::test]
     async fn returns_bad_request_for_missing_client_id() {

@@ -1,8 +1,9 @@
 use domain::error::AppError;
-use domain::task::{GetTaskInput, Task};
+use domain::task::entity::Task;
+use domain::task::inputs::GetTaskInput;
 use uuid::Uuid;
 
-use super::{TaskRepositoryImpl, TaskRow};
+use super::repository::{TaskRepositoryImpl, TaskRow};
 
 pub async fn get_task(
     repo: &TaskRepositoryImpl,

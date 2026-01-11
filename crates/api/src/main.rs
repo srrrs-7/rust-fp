@@ -1,11 +1,11 @@
 use axum::{routing::get, Router};
 use std::sync::Arc;
 
-use application::task_service::TaskRepository;
-use application::user_service::UserRepository;
+use application::task_service::repository::TaskRepository;
+use application::user_service::repository::UserRepository;
 use infrastructure::db::{build_pool, DbConfig};
-use infrastructure::task_repo::TaskRepositoryImpl;
-use infrastructure::user_repo::UserRepositoryImpl;
+use infrastructure::task_repo::repository::TaskRepositoryImpl;
+use infrastructure::user_repo::repository::UserRepositoryImpl;
 use tracing_subscriber::{fmt, EnvFilter};
 
 mod middleware;
@@ -34,7 +34,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/health", get(|| async { "OK" }))
-        .nest("/v1", routes::router(state))
+        .nest("/v1", routes::router::router(state))
         .layer(axum::middleware::from_fn(
             middleware::request_logger::request_logger,
         ))

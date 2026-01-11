@@ -4,11 +4,11 @@ use axum::response::IntoResponse;
 use axum::Json;
 
 use application::task_service;
-use domain::task::UpdateTaskInput;
+use domain::task::inputs::UpdateTaskInput;
 
 use crate::middleware::cognito_auth::AuthUser;
 use crate::response::{from_app_error, validation_error, ErrorResponse};
-use crate::routes::tasks::{parse_status, CountResponse, TaskStatus, UpdateTaskRequest};
+use crate::routes::tasks::types::{parse_status, CountResponse, TaskStatus, UpdateTaskRequest};
 use crate::AppState;
 
 pub async fn handler(
@@ -47,7 +47,7 @@ pub async fn handler(
         None => None,
     };
 
-    let count = task_service::update_task(
+    let count = task_service::update_task::update_task(
         state.task_repo.as_ref(),
         UpdateTaskInput {
             user_id: user.user_id,
@@ -71,7 +71,7 @@ mod tests {
     use domain::error::AppError;
 
     use super::handler;
-    use crate::routes::tasks::UpdateTaskRequest;
+    use crate::routes::tasks::types::UpdateTaskRequest;
     use crate::routes::test_support::{
         app_state, assert_status, auth_user, MockTaskRepo, MockUserRepo,
     };

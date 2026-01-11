@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::user::{GetUserInput, User};
+use domain::user::entity::User;
+use domain::user::inputs::GetUserInput;
 
-use super::{map_db_error, UserRepositoryImpl, UserRow};
+use super::repository::{map_db_error, UserRepositoryImpl, UserRow};
 
 pub async fn get_user(
     repo: &UserRepositoryImpl,

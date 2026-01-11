@@ -4,11 +4,11 @@ use axum::Json;
 
 use application::task_service;
 use domain::error::AppError;
-use domain::task::GetTaskInput;
+use domain::task::inputs::GetTaskInput;
 
 use crate::middleware::cognito_auth::AuthUser;
 use crate::response::{from_app_error, ErrorResponse};
-use crate::routes::tasks::TaskResponse;
+use crate::routes::tasks::types::TaskResponse;
 use crate::AppState;
 
 pub async fn handler(
@@ -16,7 +16,7 @@ pub async fn handler(
     axum::extract::Extension(user): axum::extract::Extension<AuthUser>,
     Path(task_id): Path<String>,
 ) -> Result<impl IntoResponse, ErrorResponse> {
-    let task = task_service::get_task(
+    let task = task_service::get_task::get_task(
         state.task_repo.as_ref(),
         GetTaskInput {
             user_id: user.user_id,
@@ -27,13 +27,7 @@ pub async fn handler(
     .map_err(from_app_error)?
     .ok_or_else(|| from_app_error(AppError::not_found("Task", "Task not found")))?;
 
-    Ok(Json(TaskResponse {
-        task_id: task.task_id,
-        user_id: task.user_id,
-        content: task.content,
-        completed_at: task.completed_at.map(|dt| dt.to_rfc3339()),
-        version: task.version,
-    }))
+    Ok(Json(TaskResponse::from(task)))
 }
 
 #[cfg(test)]

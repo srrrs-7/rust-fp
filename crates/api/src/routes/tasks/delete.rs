@@ -4,11 +4,11 @@ use axum::response::IntoResponse;
 use axum::Json;
 
 use application::task_service;
-use domain::task::DeleteTaskInput;
+use domain::task::inputs::DeleteTaskInput;
 
 use crate::middleware::cognito_auth::AuthUser;
 use crate::response::{from_app_error, ErrorResponse};
-use crate::routes::tasks::CountResponse;
+use crate::routes::tasks::types::CountResponse;
 use crate::AppState;
 
 pub async fn handler(
@@ -16,7 +16,7 @@ pub async fn handler(
     axum::extract::Extension(user): axum::extract::Extension<AuthUser>,
     Path(task_id): Path<String>,
 ) -> Result<impl IntoResponse, ErrorResponse> {
-    let count = task_service::delete_task(
+    let count = task_service::delete_task::delete_task(
         state.task_repo.as_ref(),
         DeleteTaskInput {
             user_id: user.user_id,

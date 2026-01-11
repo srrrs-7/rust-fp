@@ -5,15 +5,17 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use chrono::Utc;
 
-use application::task_service::TaskRepository;
-use application::user_service::UserRepository;
+use application::task_service::repository::TaskRepository;
+use application::user_service::repository::UserRepository;
 use domain::error::AppError;
-use domain::task::{
-    CreateTaskInput, DeleteTaskInput, GetTaskInput, ListTasksInput, Task, UpdateTaskInput,
+use domain::task::entity::Task;
+use domain::task::inputs::{
+    CreateTaskInput, DeleteTaskInput, GetTaskInput, ListTasksInput, UpdateTaskInput,
 };
-use domain::user::{
+use domain::user::entity::User;
+use domain::user::inputs::{
     CreateUserInput, DeleteUserInput, GetUserByEmailInput, GetUserByUsernameInput, GetUserInput,
-    ListUsersInput, UpdateUserInput, User,
+    ListUsersInput, UpdateUserInput,
 };
 
 use crate::middleware::cognito_auth::AuthUser;

@@ -1,7 +1,7 @@
 use domain::error::AppError;
-use domain::task::UpdateTaskInput;
+use domain::task::inputs::UpdateTaskInput;
 
-use super::TaskRepository;
+use super::repository::TaskRepository;
 
 pub async fn update_task<R: TaskRepository + ?Sized>(
     repo: &R,

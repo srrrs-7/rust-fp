@@ -1,7 +1,8 @@
 use domain::error::AppError;
-use domain::user::{GetUserInput, User};
+use domain::user::entity::User;
+use domain::user::inputs::GetUserInput;
 
-use super::UserRepository;
+use super::repository::UserRepository;
 
 pub async fn get_user<R: UserRepository + ?Sized>(
     repo: &R,

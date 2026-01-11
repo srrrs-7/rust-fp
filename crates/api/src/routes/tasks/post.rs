@@ -3,11 +3,11 @@ use axum::response::IntoResponse;
 use axum::Json;
 
 use application::task_service;
-use domain::task::CreateTaskInput;
+use domain::task::inputs::CreateTaskInput;
 
 use crate::middleware::cognito_auth::AuthUser;
 use crate::response::{from_app_error, validation_error, ErrorResponse};
-use crate::routes::tasks::{parse_status, CreateTaskRequest, TaskResponse};
+use crate::routes::tasks::types::{parse_status, CreateTaskRequest, TaskResponse};
 use crate::AppState;
 
 pub async fn handler(
@@ -31,7 +31,7 @@ pub async fn handler(
         }
     }
 
-    let task = task_service::create_task(
+    let task = task_service::create_task::create_task(
         state.task_repo.as_ref(),
         CreateTaskInput {
             user_id: user.user_id,
@@ -41,13 +41,7 @@ pub async fn handler(
     .await
     .map_err(from_app_error)?;
 
-    Ok(Json(TaskResponse {
-        task_id: task.task_id,
-        user_id: task.user_id,
-        content: task.content,
-        completed_at: task.completed_at.map(|dt| dt.to_rfc3339()),
-        version: task.version,
-    }))
+    Ok(Json(TaskResponse::from(task)))
 }
 
 #[cfg(test)]
@@ -58,7 +52,7 @@ mod tests {
     use domain::error::AppError;
 
     use super::handler;
-    use crate::routes::tasks::CreateTaskRequest;
+    use crate::routes::tasks::types::CreateTaskRequest;
     use crate::routes::test_support::{
         app_state, assert_status, auth_user, MockTaskRepo, MockUserRepo,
     };
