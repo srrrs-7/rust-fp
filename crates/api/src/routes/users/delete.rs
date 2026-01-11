@@ -17,8 +17,8 @@ pub async fn handler(
         state.user_repo.as_ref(),
         DeleteUserInput { user_id },
     )
-        .await
-        .map_err(from_app_error)?;
+    .await
+    .map_err(from_app_error)?;
 
     Ok(Json(CountResponse { count }))
 }

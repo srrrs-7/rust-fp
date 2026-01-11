@@ -47,10 +47,7 @@ pub async fn handler(
     .await
     .map_err(from_app_error)?;
 
-    Ok((
-        StatusCode::CREATED,
-        Json(UserResponse::from(user)),
-    ))
+    Ok((StatusCode::CREATED, Json(UserResponse::from(user))))
 }
 
 #[cfg(test)]

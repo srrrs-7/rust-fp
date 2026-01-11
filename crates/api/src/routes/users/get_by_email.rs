@@ -18,9 +18,9 @@ pub async fn handler(
         state.user_repo.as_ref(),
         GetUserByEmailInput { email },
     )
-            .await
-            .map_err(from_app_error)?
-            .ok_or_else(|| from_app_error(AppError::not_found("User", "User not found")))?;
+    .await
+    .map_err(from_app_error)?
+    .ok_or_else(|| from_app_error(AppError::not_found("User", "User not found")))?;
 
     Ok(Json(UserResponse::from(user)))
 }
