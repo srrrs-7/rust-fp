@@ -1,10 +1,13 @@
-.PHONY: build run test fmt clippy check db-up db-down hooks migrate-add migrate-run init-firewall
+.PHONY: build run run-bin test fmt clippy check db-up db-down hooks migrate-add migrate-run init-firewall
 
 build:
 	cargo build
 
 run:
 	cargo run -p api
+
+run-bin: build
+	./target/debug/api
 
 test:
 	cargo test
